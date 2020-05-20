@@ -124,7 +124,7 @@ namespace scriptwich
 
             compositeKernel.Add(
                 new PowerShellKernel(),
-                new[] { "pwsh" });
+                new[] { "powershell" });
 
             compositeKernel.Add(
                 new JavaScriptKernel(),
