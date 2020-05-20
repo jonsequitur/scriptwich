@@ -5,7 +5,6 @@ using System.CommandLine.Rendering;
 using System.IO;
 using System.Reactive.Linq;
 using System.Linq;
-using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.CSharp;
@@ -14,11 +13,14 @@ using Microsoft.DotNet.Interactive.Formatting;
 using Microsoft.DotNet.Interactive.FSharp;
 using Microsoft.DotNet.Interactive.PowerShell;
 using Formatter = Microsoft.DotNet.Interactive.Formatting.Formatter;
+using System.CommandLine.IO;
 
 namespace scriptwich
 {
     class Program
     {
+        private static readonly TextSpanFormatter formatter = new TextSpanFormatter();
+
         static async Task Main(string[] args)
         {
             var root = new RootCommand
@@ -41,13 +43,17 @@ namespace scriptwich
             var output = Console.Out;
 
             using var _ = kernel.KernelEvents
-                                .OfType<DisplayEventBase>()
-                                .Subscribe(e =>
-                                {
-                                    output.WriteLine(
-                                        e.FormattedValues.SingleOrDefault(f => f.MimeType == "text/html")?.Value ??
-                                        e.Value.ToDisplayString());
-                                });
+                           .Subscribe(e =>
+                           {
+                               var (writer, message) = GetOutput(console, e);
+
+                               if (message != default)
+                               {
+                                   var span = formatter.ParseToSpan(message);
+                                   var text = span.ToString(OutputMode.Ansi);
+                                   writer.WriteLine(text);
+                               }
+                           });
 
             Formatter.DefaultMimeType = PlainTextFormatter.MimeType;
 
@@ -55,49 +61,44 @@ namespace scriptwich
 
             var result = await kernel.SubmitCodeAsync(scriptCode);
 
-            var formatter = new TextSpanFormatter();
+        }
 
-            result.KernelEvents
-                  .Subscribe(e =>
-                  {
-                      var (writer, message) = e switch
-                      {
-                          CommandFailed failed =>
-                          (
-                              console.Error,
-                              failed.Message.Red()
-                          ),
-                          ErrorProduced ep =>
-                          (
-                              console.Error,
-                              ep.Message.Red()),
-                          StandardErrorValueProduced er =>
-                          (
-                              console.Error,
-                              er.FormattedValues.FirstOrDefault(v => v.MimeType == "text/plain")?.Value.Default()
-                          ),
-                          IncompleteCodeSubmissionReceived _ =>
-                          (
-                              console.Error,
-                              default
-                          ),
-                          // DisplayEventBase d =>
-                          // (
-                          //     console.Out,
-                          //     d.FormattedValues.FirstOrDefault(v => v.MimeType == "text/plain")?.Value.Default()
-                          // ),
-                          _ => default
-                      };
-
-                      if (message != default)
-                      {
-                          var span = formatter.ParseToSpan(message);
-
-                          var text = span.ToString(OutputMode.Ansi);
-
-                          writer.Write(text);
-                      }
-                  });
+        private static (IStandardStreamWriter, FormattableString) GetOutput(IConsole console, IKernelEvent e)
+        {
+            return e switch
+            {
+                CommandFailed failed =>
+                (
+                    console.Error,
+                    failed.Message.Red()
+                ),
+                ErrorProduced ep =>
+                (
+                    console.Error,
+                    ep.Message.Red()
+                ),
+                StandardErrorValueProduced er =>
+                (
+                    console.Error,
+                    er.FormattedValues.FirstOrDefault(v => v.MimeType == "text/plain")?.Value.Default()
+                ),
+                IncompleteCodeSubmissionReceived _ =>
+                (
+                    console.Error,
+                    default
+                ),
+                DisplayEventBase d =>
+                (
+                    console.Out,
+                    d.FormattedValues.FirstOrDefault(v => v.MimeType == "text/plain")?.Value.Default()
+                ),
+                DiagnosticLogEntryProduced diag => 
+                (
+                    console.Out,
+                    diag.Message.Gray()
+                ),
+                _ => default
+            };
         }
 
         private static KernelBase CreateKernel()

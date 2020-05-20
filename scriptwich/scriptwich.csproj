@@ -6,12 +6,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="microsoft.dotnet.interactive" Version="1.0.0-beta.20201.7" />
-    <PackageReference Include="microsoft.dotnet.interactive.csharp" Version="1.0.0-beta.20201.7" />
-    <PackageReference Include="microsoft.dotnet.interactive.powershell" Version="1.0.0-beta.20201.7" />
-    <PackageReference Include="microsoft.dotnet.interactive.formatting" Version="1.0.0-beta.20201.7" />
-    <PackageReference Include="microsoft.dotnet.interactive.fsharp" Version="1.0.0-beta.20201.7" />
-    <PackageReference Include="system.commandline.rendering" Version="0.3.0-alpha.20161.1" />
+    <PackageReference Include="microsoft.dotnet.interactive" Version="1.0.6" />
+    <PackageReference Include="microsoft.dotnet.interactive.csharp" Version="1.0.6" />
+    <PackageReference Include="microsoft.dotnet.interactive.powershell" Version="1.0.6" />
+    <PackageReference Include="microsoft.dotnet.interactive.formatting" Version="1.0.6" />
+    <PackageReference Include="microsoft.dotnet.interactive.fsharp" Version="1.0.6" />
+    <PackageReference Include="system.commandline.rendering" Version="0.3.0-alpha.20253.1" />
   </ItemGroup>
 
 </Project>
