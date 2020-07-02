@@ -1,0 +1,13 @@
+#!powershell
+
+Write-Output "Hello from PowerShell!"
+
+#!fsharp
+
+
+"Hello from F#!" |> Console.WriteLine
+
+#!csharp
+#r "nuget:Humanizer"
+using Humanizer;
+Console.WriteLine("hello from c#.".Transform(To.TitleCase));

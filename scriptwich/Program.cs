@@ -118,6 +118,7 @@ namespace scriptwich
             compositeKernel.Add(
                 new FSharpKernel()
                     .UseDefaultFormatting()
+                    .UseNugetDirective()
                     .UseKernelHelpers()
                     .UseWho()
                     .UseDefaultNamespaces());
