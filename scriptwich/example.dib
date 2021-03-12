@@ -9,5 +9,4 @@ Write-Output "Hello from PowerShell!"
 
 
 #!csharp
-#!log
 Console.WriteLine("Hello from C#.");
